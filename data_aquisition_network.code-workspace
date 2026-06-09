@@ -1,0 +1,15 @@
+{
+	"folders": [
+		{
+			"name": "thermalsensor1",
+			"path": "."
+		},
+		{
+			"path": "../air_velocity_sensor"
+		},
+		{
+			"path": "../diff_pressure_sensor"
+		}
+	],
+	"settings": {}
+}

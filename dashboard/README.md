@@ -142,6 +142,20 @@ Error: The specified token is not valid. Use `vercel login` to generate a new to
 
 So the app is build-ready, but this Mac needs a fresh Vercel login before CLI deployment works.
 
+For Git-based Vercel deployment, import the GitHub repo and set the project root directory to:
+
+```text
+dashboard
+```
+
+Then set:
+
+```text
+Build Command: npm run build
+Output Directory: dist
+Install Command: npm ci
+```
+
 ## Convex Note
 
 Convex is not required for v1 because Google Sheets is already the experiment log and Apps Script is enough for read/write endpoints. Convex becomes useful if we want:

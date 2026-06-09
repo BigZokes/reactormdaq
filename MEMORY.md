@@ -301,6 +301,20 @@ This is an Apps Script contract test that checks `doGet` health/dashboard reads,
 
 The simulator upload script now also sends `method=setRun` before appending fake rows unless `SET_RUN=0` is set. This keeps simulator rows grouped under the chosen `RUN_ID`.
 
+GitHub CI has been added in:
+
+```text
+.github/workflows/reactor-daq-ci.yml
+```
+
+It checks the new safe project paths for obvious committed secrets, builds the dashboard, creates `include/secrets.h` from `include/secrets.example.h`, and compiles `gateway` plus `temp1` through `temp8`.
+
+Home-vs-lab work is documented in:
+
+```text
+docs/HOME_WORK.md
+```
+
 The local Apps Script source now includes a `doGet` endpoint for dashboard reads:
 
 ```text

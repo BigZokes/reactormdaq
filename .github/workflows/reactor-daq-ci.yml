@@ -1,0 +1,76 @@
+name: Reactor DAQ CI
+
+on:
+  push:
+    branches:
+      - main
+      - "codex/**"
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  safety:
+    name: Secret guard
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check new project paths for committed secrets
+        run: |
+          set -euo pipefail
+          grep -R -n -E 'script[.]google[.]com/macros/s/AK|WIFI_PASSWORD[[:space:]]*=[[:space:]]*"[^Y]|password[[:space:]]*=[[:space:]]*"[^Y]|WIFI_SSID[[:space:]]*=[[:space:]]*"[^Y]|ssid[[:space:]]*=[[:space:]]*"[^Y]' \
+            --exclude='secrets.h' \
+            apps_script \
+            dashboard \
+            include \
+            src \
+            src_legacy \
+            platformio.ini \
+            MEMORY.md \
+            NEXT_STEPS.md && exit 1 || true
+
+  dashboard:
+    name: Dashboard build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: dashboard
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: dashboard/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build dashboard
+        run: npm run build
+
+  firmware:
+    name: PlatformIO firmware build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install PlatformIO
+        run: python -m pip install --upgrade platformio
+
+      - name: Create CI secrets header
+        run: cp include/secrets.example.h include/secrets.h
+
+      - name: Build gateway and temperature nodes
+        run: pio run -e gateway -e temp1 -e temp2 -e temp3 -e temp4 -e temp5 -e temp6 -e temp7 -e temp8

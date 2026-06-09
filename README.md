@@ -1,6 +1,47 @@
 # Distributed_Data_Acquisition_Network
 [insert image] 
 
+## Current Working Branch
+
+The active PlatformIO/dashboard rebuild is in this repo alongside the original source files.
+
+Important folders:
+
+- `src/`: current gateway and shared thermocouple node firmware.
+- `platformio.ini`: build targets for `gateway` and `temp1` through `temp8`.
+- `apps_script/`: Google Apps Script backend for Google Sheets logging and dashboard reads.
+- `dashboard/`: Vite React dashboard that can run from home in simulator mode and switch to live Apps Script data.
+- `src_legacy/`: sanitized reference copy of the earlier Arduino sketches.
+- `MEMORY.md` and `NEXT_STEPS.md`: project handoff notes for continuing the work.
+
+Current priority is temperature-only data acquisition. The gateway accepts partial thermocouple availability, so missing/stale nodes do not block rows from being written.
+
+## Quick Verification
+
+Dashboard:
+
+```sh
+cd dashboard
+npm ci
+npm run build
+```
+
+Firmware:
+
+```sh
+cp include/secrets.example.h include/secrets.h
+pio run -e gateway -e temp1 -e temp2 -e temp3 -e temp4 -e temp5 -e temp6 -e temp7 -e temp8
+```
+
+Apps Script backend after deployment:
+
+```sh
+cd dashboard
+APPS_SCRIPT_URL="https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec" npm run test:backend
+```
+
+Do not commit `include/secrets.h`, `.env`, `.pio/`, `dashboard/node_modules/`, or `dashboard/dist/`.
+
 ## Overview
 This project is a distributed data acquisition network that is designed for real-time monitoring of temperature, pressure, and airflow within a biomass gasifier. It is developed to support biomass gasification research through synchronized data collection and experimental analysis. It integrates embedded systems, wireless telemetry, distributed instrumentation, and custom PCB development into a scalable monitoring platform for research.
 

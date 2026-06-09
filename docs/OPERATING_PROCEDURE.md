@@ -11,6 +11,8 @@ This procedure is for temperature-only reactor experiments using the gateway plu
    APPS_SCRIPT_URL="https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec" npm run test:backend
    ```
 
+   The current Apps Script can migrate an older v1 `Data` sheet by inserting the v2 diagnostic columns before `GatewayStatus`. It should not delete existing rows.
+
 3. Set a run name, for example `EXP-2026-06-09-A`, using one of:
    - the dashboard run-control input in live mode
    - `Control!B1` in the Google Sheet

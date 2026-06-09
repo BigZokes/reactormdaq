@@ -40,4 +40,4 @@ The script manages two sheets:
 
 Rows are not overwritten. A new experiment is separated by changing `Control!B1` before or during the run.
 
-When the script starts against an older sheet, it rewrites the header row to the current expected layout. Existing old rows are not deleted, but new rows will use the current `temperature-daq-v2` schema.
+When the script starts against an older v1 `Data` sheet, it inserts the missing diagnostic columns before `GatewayStatus` and then writes the current header row. Existing old rows are not deleted, and their old `GatewayStatus` values stay under the correct column. New rows use the current `temperature-daq-v2` schema.

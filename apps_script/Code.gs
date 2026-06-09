@@ -4,7 +4,7 @@ const RUNS_SHEET_NAME = "Runs";
 const DEFAULT_RUN_ID = "TEST-001";
 const SCHEMA_VERSION = "temperature-daq-v2";
 
-const HEADERS = [
+const CORE_HEADERS = [
   "Time",
   "RunID",
   "Temp1",
@@ -22,7 +22,10 @@ const HEADERS = [
   "Temp5_Status",
   "Temp6_Status",
   "Temp7_Status",
-  "Temp8_Status",
+  "Temp8_Status"
+];
+
+const DIAGNOSTIC_HEADERS = [
   "Temp1_AgeSec",
   "Temp2_AgeSec",
   "Temp3_AgeSec",
@@ -46,9 +49,11 @@ const HEADERS = [
   "Temp5_Fault",
   "Temp6_Fault",
   "Temp7_Fault",
-  "Temp8_Fault",
-  "GatewayStatus"
+  "Temp8_Fault"
 ];
+
+const HEADERS = CORE_HEADERS.concat(DIAGNOSTIC_HEADERS, ["GatewayStatus"]);
+const LEGACY_V1_HEADERS = CORE_HEADERS.concat(["GatewayStatus"]);
 
 function doPost(e) {
   if (!e || !e.postData) {
@@ -203,15 +208,68 @@ function ensureDataSheet_(ss) {
     sheet = ss.insertSheet(DATA_SHEET_NAME);
   }
 
-  const firstRow = sheet.getRange(1, 1, 1, HEADERS.length).getValues()[0];
-  const hasHeaders = firstRow.some(value => String(value || "").trim() !== "");
-  const headersMatch = HEADERS.every((header, index) => String(firstRow[index] || "").trim() === header);
-  if (!hasHeaders || !headersMatch) {
+  const firstRow = getHeaderRow_(sheet);
+  const hasHeaders = firstRow.some(value => value !== "");
+  if (!hasHeaders) {
     sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
     sheet.setFrozenRows(1);
+    return sheet;
   }
 
+  if (headersMatch_(firstRow, HEADERS)) {
+    sheet.setFrozenRows(1);
+    return sheet;
+  }
+
+  if (headersMatch_(firstRow, LEGACY_V1_HEADERS) || canInsertDiagnosticHeaders_(firstRow)) {
+    insertMissingDiagnosticColumns_(sheet, firstRow);
+    sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
+    sheet.setFrozenRows(1);
+    return sheet;
+  }
+
+  sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
+  sheet.setFrozenRows(1);
   return sheet;
+}
+
+function getHeaderRow_(sheet) {
+  const width = Math.max(sheet.getLastColumn(), HEADERS.length);
+  return sheet
+    .getRange(1, 1, 1, width)
+    .getValues()[0]
+    .map(value => String(value || "").trim());
+}
+
+function headersMatch_(actual, expected) {
+  return expected.every((header, index) => String(actual[index] || "").trim() === header);
+}
+
+function canInsertDiagnosticHeaders_(headers) {
+  const gatewayIndex = headers.indexOf("GatewayStatus");
+  if (gatewayIndex < 0) {
+    return false;
+  }
+
+  return CORE_HEADERS.every((header, index) => headers[index] === header);
+}
+
+function insertMissingDiagnosticColumns_(sheet, headers) {
+  const workingHeaders = headers.slice();
+
+  DIAGNOSTIC_HEADERS.forEach(header => {
+    if (workingHeaders.indexOf(header) >= 0) {
+      return;
+    }
+
+    const gatewayIndex = workingHeaders.indexOf("GatewayStatus");
+    if (gatewayIndex < 0) {
+      return;
+    }
+
+    sheet.insertColumnBefore(gatewayIndex + 1);
+    workingHeaders.splice(gatewayIndex, 0, header);
+  });
 }
 
 function ensureRunsSheet_(ss) {

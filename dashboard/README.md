@@ -112,17 +112,23 @@ If this fails with a non-JSON response, the deployed Apps Script is probably sti
 
 ## Vercel Deployment
 
+Detailed deployment notes are in:
+
+```text
+../docs/DASHBOARD_DEPLOYMENT.md
+```
+
 From this `dashboard` folder:
 
 ```sh
 npm run build
-vercel
+npx vercel deploy
 ```
 
 For production:
 
 ```sh
-vercel --prod
+npx vercel deploy --prod
 ```
 
 In Vercel project settings, add this environment variable when the Apps Script `doGet` endpoint is deployed:

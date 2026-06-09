@@ -76,6 +76,7 @@ Deployment note:
 - GitHub is authenticated and the draft PR is live.
 - The Vercel account connector can see the team, but the local Vercel CLI is not authenticated yet.
 - To deploy from this Mac, run the deploy from the `dashboard` folder after Vercel CLI login/linking.
+- Detailed deployment steps and the manual GitHub Actions deploy workflow are in `docs/DASHBOARD_DEPLOYMENT.md`.
 
 ## Commands Used Recently
 

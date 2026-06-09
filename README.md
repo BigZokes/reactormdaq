@@ -12,6 +12,7 @@ Important folders:
 - `apps_script/`: Google Apps Script backend for Google Sheets logging and dashboard reads.
 - `dashboard/`: Vite React dashboard that can run from home in simulator mode and switch to live Apps Script data.
 - `src_legacy/`: sanitized reference copy of the earlier Arduino sketches.
+- `docs/DASHBOARD_DEPLOYMENT.md`: Vercel deployment and environment setup notes.
 - `MEMORY.md` and `NEXT_STEPS.md`: project handoff notes for continuing the work.
 
 Current priority is temperature-only data acquisition. The gateway accepts partial thermocouple availability, so missing/stale nodes do not block rows from being written.

@@ -66,6 +66,10 @@ npx vercel deploy --prod
 
 Current note: the local CLI was not authenticated during the last Codex run, so deployment stopped at login. The Vercel account connector could list projects, but local deployment still needs CLI auth or Git import.
 
+Follow-up note from the next check: the Vercel connector is authenticated and can list the team/projects, but its deploy action still routes back to the local CLI or Git integration. The local CLI again started a device-login flow, so the most reliable path is still Git import unless the CLI login is completed on this Mac.
+
+Before expecting live mode on Vercel, redeploy `apps_script/Code.gs` in Apps Script and run the backend contract test. The latest tested web app deployments returned `Script function not found: doGet`, which means uploads may still work but dashboard reads are not active yet.
+
 ## Manual GitHub Action Deployment
 
 The repo includes a manual workflow:

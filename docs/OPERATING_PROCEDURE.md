@@ -90,6 +90,28 @@ node scripts/flash-device.mjs --env temp1 --set-serial 206EF133B55C --write
 
 The first command is a dry run. The second command updates `docs/DEVICE_MAP.csv`.
 
+## Monitoring A Board
+
+Use the monitor helper before and after flashing so you can confirm what the board thinks it is doing.
+
+```sh
+node scripts/monitor-device.mjs --list
+node scripts/monitor-device.mjs --ports
+node scripts/monitor-device.mjs --env gateway
+node scripts/monitor-device.mjs --env gateway --monitor
+```
+
+For a board that does not have `Known Serial` filled in yet:
+
+```sh
+node scripts/monitor-device.mjs --env temp1 --port /dev/cu.usbmodemXXXXXXXXXXXX2 --monitor
+```
+
+Expected useful logs:
+
+- gateway: Wi-Fi connection, Apps Script upload response, `RX ... TempN` packet lines
+- thermocouple node: MAC/channel identity, thermocouple readings, fault messages, ESP-NOW send result
+
 ## After The Experiment
 
 1. Confirm the final rows use the intended `RunID`.

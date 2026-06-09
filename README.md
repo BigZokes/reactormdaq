@@ -40,6 +40,7 @@ Safe flash helper:
 
 ```sh
 node scripts/flash-device.mjs --list
+node scripts/flash-device.mjs --ports
 node scripts/flash-device.mjs --env temp6 --dry-run
 ```
 

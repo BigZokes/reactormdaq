@@ -16,8 +16,13 @@ if (args.list) {
   process.exit(0);
 }
 
+if (args.ports) {
+  printUsbPorts();
+  process.exit(0);
+}
+
 if (!args.env) {
-  console.error("Missing --env. Use --list to see available PlatformIO environments.");
+  console.error("Missing --env. Use --list to see available PlatformIO environments or --ports to see connected boards.");
   process.exit(1);
 }
 
@@ -80,6 +85,7 @@ function parseArgs(input) {
     help: false,
     list: false,
     port: "",
+    ports: false,
     upload: false
   };
 
@@ -87,6 +93,7 @@ function parseArgs(input) {
     const arg = input[index];
     if (arg === "--help" || arg === "-h") parsed.help = true;
     else if (arg === "--list") parsed.list = true;
+    else if (arg === "--ports") parsed.ports = true;
     else if (arg === "--dry-run") parsed.dryRun = true;
     else if (arg === "--upload") parsed.upload = true;
     else if (arg === "--env") parsed.env = input[++index] || "";
@@ -144,6 +151,31 @@ function findPortForSerial(serial) {
   return matches[0] || "";
 }
 
+function listUsbModemPorts() {
+  try {
+    return readdirSync("/dev")
+      .filter((entry) => entry.startsWith("cu.usbmodem"))
+      .map((entry) => `/dev/${entry}`)
+      .sort();
+  } catch {
+    return [];
+  }
+}
+
+function printUsbPorts() {
+  const ports = listUsbModemPorts();
+  if (!ports.length) {
+    console.log("No /dev/cu.usbmodem* ports found.");
+    return;
+  }
+
+  const rows = ports.map((port) => ({
+    port,
+    serial: port.replace(/^.*cu\.usbmodem/, "").replace(/\d$/, "") || "-"
+  }));
+  console.table(rows);
+}
+
 function printDeviceMap(entries) {
   const rows = entries.map((entry) => ({
     channel: entry.Channel,
@@ -157,11 +189,13 @@ function printDeviceMap(entries) {
 function printHelp() {
   console.log(`Usage:
   node scripts/flash-device.mjs --list
+  node scripts/flash-device.mjs --ports
   node scripts/flash-device.mjs --env temp6 --dry-run
   node scripts/flash-device.mjs --env temp6 --port /dev/cu.usbmodem206EF133A96C2 --upload
 
 Options:
   --list              Show device map entries.
+  --ports             Show connected /dev/cu.usbmodem* ports.
   --env <name>        PlatformIO environment, such as gateway, temp1, or temp6.
   --port <path>       Explicit upload port. Required when Known Serial is missing.
   --dry-run           Print the resolved command without flashing.

@@ -66,6 +66,7 @@ Safer helper flow:
 
 ```sh
 node scripts/flash-device.mjs --list
+node scripts/flash-device.mjs --ports
 node scripts/flash-device.mjs --env temp6 --dry-run
 node scripts/flash-device.mjs --env temp6 --upload
 ```
@@ -77,6 +78,8 @@ node scripts/flash-device.mjs --env temp1 --port /dev/cu.usbmodemXXXXXXXXXXXX2 -
 ```
 
 Use the environment that matches the intended thermocouple channel. Do not flash a board until its physical label, MAC, and intended `TempN` are clear.
+
+When a new board serial is confirmed, add it to `docs/DEVICE_MAP.csv` before flashing. That lets the helper auto-resolve the correct USB port next time.
 
 ## After The Experiment
 

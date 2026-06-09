@@ -22,6 +22,8 @@ async function runContract() {
   const health = await getJson("mode=health");
   assert(health.ok === true, "Health endpoint did not return ok=true.");
   assert(typeof health.runId === "string", "Health endpoint did not return a runId.");
+  assert(health.schemaVersion === "temperature-daq-v1", "Health endpoint did not return the expected schemaVersion. Redeploy apps_script/Code.gs.");
+  assert(health.runsSheet === "Runs", "Health endpoint did not report the Runs sheet. Redeploy apps_script/Code.gs.");
 
   const setRun = await postJson({
     method: "setRun",
@@ -30,6 +32,7 @@ async function runContract() {
   });
   assert(setRun.ok === true, "setRun did not return ok=true. Redeploy apps_script/Code.gs if this endpoint is old.");
   assert(setRun.runId === runId, `setRun returned runId=${setRun.runId}, expected ${runId}.`);
+  assert(setRun.schemaVersion === "temperature-daq-v1", "setRun did not return the expected schemaVersion. Redeploy apps_script/Code.gs.");
 
   const beforeAppend = await getJson("mode=dashboard&limit=5");
   assert(beforeAppend.ok === true, "Dashboard endpoint did not return ok=true.");

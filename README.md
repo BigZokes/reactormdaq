@@ -33,6 +33,12 @@ cp include/secrets.example.h include/secrets.h
 pio run -e gateway -e temp1 -e temp2 -e temp3 -e temp4 -e temp5 -e temp6 -e temp7 -e temp8
 ```
 
+Repository checks:
+
+```sh
+node scripts/check-repo.mjs
+```
+
 Apps Script backend after deployment:
 
 ```sh

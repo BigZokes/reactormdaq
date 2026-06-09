@@ -36,6 +36,7 @@ Saved: 2026-06-08 22:11 CDT
    - `TempN` assignment.
    - Reactor position.
    - Notes about wiring/amplifier behavior.
+   - Use `docs/DEVICE_MAP.csv` as the working table.
 
 3. Improve fault handling.
    - Distinguish disconnected thermocouple amplifier faults from powered-off nodes.
@@ -46,6 +47,7 @@ Saved: 2026-06-08 22:11 CDT
    - Before each run, set `Control!B1` to a run name like `EXP-2026-06-09-A`.
    - Confirm all expected thermocouples are `OK`.
    - Keep all data in the `Data` sheet and filter by `RunID`.
+   - Follow `docs/OPERATING_PROCEDURE.md` for startup, troubleshooting, and shutdown.
 
 ## Web App Idea
 
@@ -92,4 +94,3 @@ Monitor gateway:
 source /Users/peterzokoro/.zshrc >/dev/null 2>&1
 pio device monitor -p /dev/cu.usbmodemE4B063AEB72C2 -b 115200
 ```
-

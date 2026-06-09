@@ -104,6 +104,7 @@ This checks:
 - `GET ?mode=dashboard`
 - `POST method=append`
 - that the appended row is readable by the dashboard endpoint
+- that the deployed script reports the current `temperature-daq-v1` schema
 
 If this fails with a non-JSON response, the deployed Apps Script is probably still the older version and needs to be redeployed.
 

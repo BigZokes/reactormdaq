@@ -315,6 +315,15 @@ Home-vs-lab work is documented in:
 docs/HOME_WORK.md
 ```
 
+The lab operating procedure and working device map are now in:
+
+```text
+docs/OPERATING_PROCEDURE.md
+docs/DEVICE_MAP.csv
+```
+
+`DEVICE_MAP.csv` includes the known MAC addresses for Temp1 through Temp8 and the gateway, plus columns for physical labels, serial numbers, reactor position, wiring notes, and last verification date.
+
 The local Apps Script source now includes a `doGet` endpoint for dashboard reads:
 
 ```text

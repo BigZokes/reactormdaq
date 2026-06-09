@@ -1,0 +1,10 @@
+Channel,Known MAC,Known Serial,PlatformIO Env,Status,Physical Label,Reactor Position,Amplifier/Wiring Notes,Last Verified
+Gateway,E4:B0:63:AE:B7:2C,E4B063AEB72C,gateway,Working,Gateway,,,2026-06-08
+Temp1,20:6E:F1:33:B5:5C,,temp1,Needs updated/tested,,,,
+Temp2,20:6E:F1:33:A8:B8,,temp2,Needs updated/tested,,,,
+Temp3,20:6E:F1:32:7E:EC,,temp3,Needs updated/tested,,,,
+Temp4,E4:B0:63:AF:0B:30,,temp4,Needs updated/tested,,,,
+Temp5,20:6E:F1:31:23:94,,temp5,Needs updated/tested,,,,
+Temp6,20:6E:F1:33:A9:6C,206EF133A96C,temp6,Working,Temp6,,,2026-06-08
+Temp7,20:6E:F1:33:A4:B8,,temp7,Needs updated/tested,,,,
+Temp8,E4:B0:63:AE:07:84,,temp8,Needs updated/tested,,,,

@@ -12,6 +12,7 @@ This project can keep moving even when the microcontrollers are not available.
 - Add GitHub CI and repo hygiene checks.
 - Write operating procedures for experiments, startup, shutdown, and troubleshooting.
 - Plan the physical board labels and final `TempN` reactor position map.
+- Maintain `docs/DEVICE_MAP.csv` as the source of truth for board/channel assignment.
 - Decide the stale-node policy: keep last value, blank it out, or mark it separately.
 - Decide whether Google Sheets remains enough or whether Convex becomes the real backend later.
 

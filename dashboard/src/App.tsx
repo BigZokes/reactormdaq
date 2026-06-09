@@ -255,8 +255,11 @@ function TemperatureChart({ rows }: { rows: DashboardSnapshot["rows"] }) {
   });
 
   const values = series.flat().map((point) => point.y);
-  const min = Math.min(...values, 0);
-  const max = Math.max(...values, 1);
+  const rawMin = values.length ? Math.min(...values) : 0;
+  const rawMax = values.length ? Math.max(...values) : 1;
+  const padding = Math.max((rawMax - rawMin) * 0.08, 2);
+  const min = rawMin - padding;
+  const max = rawMax + padding;
   const width = 920;
   const height = 300;
   const pad = 28;

@@ -3,6 +3,7 @@ import type { DashboardSnapshot, DataRow, NodeStatus, SensorReading, StatusKey, 
 
 const tempKey = (index: number) => `Temp${index}` as TemperatureKey;
 const statusKey = (index: number) => `Temp${index}_Status` as StatusKey;
+const knownStatuses: NodeStatus[] = ["OK", "MISSING", "STALE", "FAULT", "UNKNOWN"];
 
 const baseProfiles = [520, 505, 480, 430, 390, 24.5, 310, 285];
 const amplitudes = [24, 20, 18, 16, 14, 1.2, 10, 12];
@@ -16,7 +17,7 @@ export function rowToSensors(row: DataRow): SensorReading[] {
       channel,
       label: key,
       value: typeof row[key] === "number" ? row[key] ?? null : null,
-      status: (row[status] || "UNKNOWN") as NodeStatus
+      status: normalizeStatus(row[status])
     };
   });
 }
@@ -35,7 +36,7 @@ export async function fetchLiveSnapshot(): Promise<DashboardSnapshot> {
     throw new Error(`Apps Script returned HTTP ${response.status}`);
   }
 
-  const payload = await response.json();
+  const payload = await parseJsonResponse(response);
   const rows = normalizeRows(payload.rows || []);
   const latest = rows.at(-1) || emptyRow(payload.runId || "UNKNOWN");
 
@@ -151,7 +152,7 @@ function normalizeRows(input: unknown[]): DataRow[] {
         const value = row[temp];
         normalized[temp] = typeof value === "number" ? value : value === "" || value == null ? null : Number(value);
         if (Number.isNaN(normalized[temp])) normalized[temp] = null;
-        normalized[status] = String(row[status] || "UNKNOWN") as NodeStatus;
+        normalized[status] = normalizeStatus(row[status]);
       }
 
       return normalized;
@@ -169,6 +170,20 @@ function emptyRow(runId: string): DataRow {
     row[statusKey(channel)] = "UNKNOWN";
   }
   return row;
+}
+
+async function parseJsonResponse(response: Response): Promise<Record<string, any>> {
+  const text = await response.text();
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error(`Apps Script did not return JSON: ${text.slice(0, 140)}`);
+  }
+}
+
+function normalizeStatus(value: unknown): NodeStatus {
+  const status = String(value || "UNKNOWN").trim().toUpperCase() as NodeStatus;
+  return knownStatuses.includes(status) ? status : "UNKNOWN";
 }
 
 function pseudoNoise(seed: number, salt: number): number {

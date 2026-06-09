@@ -17,19 +17,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Check new project paths for committed secrets
-        run: |
-          set -euo pipefail
-          grep -R -n -E 'script[.]google[.]com/macros/s/AK|WIFI_PASSWORD[[:space:]]*=[[:space:]]*"[^Y]|password[[:space:]]*=[[:space:]]*"[^Y]|WIFI_SSID[[:space:]]*=[[:space:]]*"[^Y]|ssid[[:space:]]*=[[:space:]]*"[^Y]' \
-            --exclude='secrets.h' \
-            apps_script \
-            dashboard \
-            include \
-            src \
-            src_legacy \
-            platformio.ini \
-            MEMORY.md \
-            NEXT_STEPS.md && exit 1 || true
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Run repository checks
+        run: node scripts/check-repo.mjs
 
   dashboard:
     name: Dashboard build

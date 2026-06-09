@@ -15,6 +15,7 @@ Saved: 2026-06-08 22:11 CDT
 - Upload payload now includes:
   - `Temp1` through `Temp8`
   - `Temp1_Status` through `Temp8_Status`
+  - `Temp1_AgeSec` / `Temp1_Packets` / `Temp1_Fault` through `Temp8_*`
   - `GatewayStatus`
 - Missing thermocouples are marked as `MISSING` instead of blocking the whole row.
 - The spreadsheet Apps Script now supports:
@@ -42,6 +43,7 @@ Saved: 2026-06-08 22:11 CDT
    - Distinguish disconnected thermocouple amplifier faults from powered-off nodes.
    - Decide stale timeout behavior for experiment logging.
    - Consider adding packet counters, last-seen age, and maybe RSSI if available.
+   - Packet counters, last-seen age, and MAX31855 fault fields are now in the v2 schema; verify them on real hardware.
 
 4. Tighten experiment workflow.
    - Before each run, set `Control!B1` to a run name like `EXP-2026-06-09-A`.

@@ -35,9 +35,9 @@ If it returns HTML or says the response is not JSON, the deployed web app is sti
 The script manages two sheets:
 
 - `Control`: stores the active `RunID` in `B1` and optional notes in `B2`.
-- `Data`: append-only experiment table with `Time`, `RunID`, `Temp1` through `Temp8`, per-channel status fields, and `GatewayStatus`.
+- `Data`: append-only experiment table with `Time`, `RunID`, `Temp1` through `Temp8`, per-channel status, age seconds, packet count, fault fields, and `GatewayStatus`.
 - `Runs`: small run-change log written whenever `method=setRun` is used.
 
 Rows are not overwritten. A new experiment is separated by changing `Control!B1` before or during the run.
 
-When the script starts against an older sheet, it rewrites the header row to the current expected layout. Existing old rows are not deleted, but new rows will use the current schema.
+When the script starts against an older sheet, it rewrites the header row to the current expected layout. Existing old rows are not deleted, but new rows will use the current `temperature-daq-v2` schema.

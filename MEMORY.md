@@ -301,6 +301,18 @@ This is an Apps Script contract test that checks `doGet` health/dashboard reads,
 
 The simulator upload script now also sends `method=setRun` before appending fake rows unless `SET_RUN=0` is set. This keeps simulator rows grouped under the chosen `RUN_ID`.
 
+The data contract is now `temperature-daq-v2`. Each channel includes:
+
+```text
+TempN
+TempN_Status
+TempN_AgeSec
+TempN_Packets
+TempN_Fault
+```
+
+The gateway remains backward-compatible with the old two-field ESP-NOW packet shape, but updated thermocouple node firmware sends a fault code so the gateway can distinguish MAX31855 faults more clearly.
+
 GitHub CI has been added in:
 
 ```text

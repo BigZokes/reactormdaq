@@ -20,11 +20,44 @@ export type StatusKey =
   | "Temp7_Status"
   | "Temp8_Status";
 
+export type AgeKey =
+  | "Temp1_AgeSec"
+  | "Temp2_AgeSec"
+  | "Temp3_AgeSec"
+  | "Temp4_AgeSec"
+  | "Temp5_AgeSec"
+  | "Temp6_AgeSec"
+  | "Temp7_AgeSec"
+  | "Temp8_AgeSec";
+
+export type PacketKey =
+  | "Temp1_Packets"
+  | "Temp2_Packets"
+  | "Temp3_Packets"
+  | "Temp4_Packets"
+  | "Temp5_Packets"
+  | "Temp6_Packets"
+  | "Temp7_Packets"
+  | "Temp8_Packets";
+
+export type FaultKey =
+  | "Temp1_Fault"
+  | "Temp2_Fault"
+  | "Temp3_Fault"
+  | "Temp4_Fault"
+  | "Temp5_Fault"
+  | "Temp6_Fault"
+  | "Temp7_Fault"
+  | "Temp8_Fault";
+
 export type SensorReading = {
   channel: number;
   label: TemperatureKey;
   value: number | null;
   status: NodeStatus;
+  ageSec: number | null;
+  packets: number;
+  fault: string;
 };
 
 export type DataRow = {
@@ -32,7 +65,9 @@ export type DataRow = {
   RunID: string;
   GatewayStatus: string;
 } & Partial<Record<TemperatureKey, number | null>> &
-  Partial<Record<StatusKey, NodeStatus>>;
+  Partial<Record<StatusKey, NodeStatus>> &
+  Partial<Record<AgeKey | PacketKey, number | null>> &
+  Partial<Record<FaultKey, string>>;
 
 export type DashboardSnapshot = {
   source: "live" | "simulated";

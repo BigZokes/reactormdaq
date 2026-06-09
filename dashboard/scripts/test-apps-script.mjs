@@ -22,7 +22,7 @@ async function runContract() {
   const health = await getJson("mode=health");
   assert(health.ok === true, "Health endpoint did not return ok=true.");
   assert(typeof health.runId === "string", "Health endpoint did not return a runId.");
-  assert(health.schemaVersion === "temperature-daq-v1", "Health endpoint did not return the expected schemaVersion. Redeploy apps_script/Code.gs.");
+  assert(health.schemaVersion === "temperature-daq-v2", "Health endpoint did not return the expected schemaVersion. Redeploy apps_script/Code.gs.");
   assert(health.runsSheet === "Runs", "Health endpoint did not report the Runs sheet. Redeploy apps_script/Code.gs.");
 
   const setRun = await postJson({
@@ -32,7 +32,7 @@ async function runContract() {
   });
   assert(setRun.ok === true, "setRun did not return ok=true. Redeploy apps_script/Code.gs if this endpoint is old.");
   assert(setRun.runId === runId, `setRun returned runId=${setRun.runId}, expected ${runId}.`);
-  assert(setRun.schemaVersion === "temperature-daq-v1", "setRun did not return the expected schemaVersion. Redeploy apps_script/Code.gs.");
+  assert(setRun.schemaVersion === "temperature-daq-v2", "setRun did not return the expected schemaVersion. Redeploy apps_script/Code.gs.");
 
   const beforeAppend = await getJson("mode=dashboard&limit=5");
   assert(beforeAppend.ok === true, "Dashboard endpoint did not return ok=true.");
@@ -48,6 +48,9 @@ async function runContract() {
 
   const matchingRow = afterAppend.rows.find((row) => row.RunID === runId && row.GatewayStatus === "SIM-CONTRACT");
   assert(Boolean(matchingRow), "Could not find the contract-test row in the latest dashboard rows.");
+  assert(matchingRow.Temp1_AgeSec === 0, "Contract row did not preserve Temp1_AgeSec.");
+  assert(matchingRow.Temp1_Packets === 101, "Contract row did not preserve Temp1_Packets.");
+  assert(matchingRow.Temp1_Fault === "NONE", "Contract row did not preserve Temp1_Fault.");
 }
 
 async function getJson(query) {
@@ -108,6 +111,9 @@ function makePayload() {
   for (let channel = 1; channel <= 8; channel++) {
     payload[`Temp${channel}`] = 200 + channel;
     payload[`Temp${channel}_Status`] = "OK";
+    payload[`Temp${channel}_AgeSec`] = 0;
+    payload[`Temp${channel}_Packets`] = 100 + channel;
+    payload[`Temp${channel}_Fault`] = "NONE";
   }
 
   return payload;

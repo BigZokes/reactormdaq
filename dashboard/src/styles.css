@@ -336,6 +336,24 @@ h2 {
   margin-top: 4px;
 }
 
+.sensor-diagnostics {
+  align-items: center;
+  color: #68737d;
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 0.74rem;
+  font-weight: 750;
+  gap: 6px;
+  line-height: 1.25;
+  margin-top: 12px;
+}
+
+.sensor-diagnostics span {
+  background: #f3f6f8;
+  border-radius: 999px;
+  padding: 4px 7px;
+}
+
 .chart-section,
 .table-section {
   background: #ffffff;

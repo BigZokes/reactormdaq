@@ -7,15 +7,22 @@
 
 #include "secrets.h"
 
+struct LegacyTemperatureMessage {
+  int NodeID;
+  float Temperature;
+};
+
 struct TemperatureMessage {
   int NodeID;
   float Temperature;
+  uint8_t FaultCode;
 };
 
 struct NodeState {
   float temperature = NAN;
   unsigned long lastSeenMs = 0;
   uint32_t packets = 0;
+  uint8_t faultCode = 0;
 };
 
 constexpr int kNodeCount = 8;
@@ -48,10 +55,33 @@ const char *nodeStatus(int index) {
   if (millis() - nodes[index].lastSeenMs > kStaleAfterMs) {
     return "STALE";
   }
-  if (isnan(nodes[index].temperature)) {
+  if (isnan(nodes[index].temperature) || nodes[index].faultCode != 0) {
     return "FAULT";
   }
   return "OK";
+}
+
+const char *faultName(uint8_t faultCode) {
+  if (faultCode == 0) {
+    return "NONE";
+  }
+  if (faultCode & 0x01) {
+    return "OPEN";
+  }
+  if (faultCode & 0x02) {
+    return "SHORT_GND";
+  }
+  if (faultCode & 0x04) {
+    return "SHORT_VCC";
+  }
+  return "UNKNOWN";
+}
+
+unsigned long nodeAgeSeconds(int index) {
+  if (nodes[index].lastSeenMs == 0) {
+    return 0;
+  }
+  return (millis() - nodes[index].lastSeenMs) / 1000;
 }
 
 const char *wifiStatusName(wl_status_t status) {
@@ -143,7 +173,7 @@ bool connectWifi(unsigned long timeoutMs) {
 }
 
 void onDataReceived(const uint8_t *macAddress, const uint8_t *data, int length) {
-  if (length < static_cast<int>(sizeof(TemperatureMessage))) {
+  if (length < static_cast<int>(sizeof(LegacyTemperatureMessage))) {
     Serial.print("Ignored short packet from ");
     Serial.print(macToString(macAddress));
     Serial.print(" length=");
@@ -151,8 +181,16 @@ void onDataReceived(const uint8_t *macAddress, const uint8_t *data, int length) 
     return;
   }
 
-  TemperatureMessage message;
-  memcpy(&message, data, sizeof(message));
+  TemperatureMessage message = {};
+  if (length >= static_cast<int>(sizeof(TemperatureMessage))) {
+    memcpy(&message, data, sizeof(message));
+  } else {
+    LegacyTemperatureMessage legacyMessage;
+    memcpy(&legacyMessage, data, sizeof(legacyMessage));
+    message.NodeID = legacyMessage.NodeID;
+    message.Temperature = legacyMessage.Temperature;
+    message.FaultCode = isnan(legacyMessage.Temperature) ? 0x80 : 0;
+  }
 
   if (message.NodeID < 1 || message.NodeID > kNodeCount) {
     Serial.print("Invalid NodeID from ");
@@ -166,6 +204,7 @@ void onDataReceived(const uint8_t *macAddress, const uint8_t *data, int length) 
   nodes[index].temperature = message.Temperature;
   nodes[index].lastSeenMs = millis();
   nodes[index].packets++;
+  nodes[index].faultCode = message.FaultCode;
   everReceivedData = true;
 
   Serial.print("RX ");
@@ -179,6 +218,10 @@ void onDataReceived(const uint8_t *macAddress, const uint8_t *data, int length) 
     Serial.print(message.Temperature, 2);
     Serial.print(" C");
   }
+  if (message.FaultCode != 0) {
+    Serial.print(" fault=");
+    Serial.print(faultName(message.FaultCode));
+  }
   Serial.print(" packets=");
   Serial.println(nodes[index].packets);
 }
@@ -186,8 +229,14 @@ void onDataReceived(const uint8_t *macAddress, const uint8_t *data, int length) 
 void addTemperature(JsonDocument &doc, int index) {
   char key[8];
   char statusKey[16];
+  char ageKey[20];
+  char packetsKey[20];
+  char faultKey[20];
   snprintf(key, sizeof(key), "Temp%d", index + 1);
   snprintf(statusKey, sizeof(statusKey), "Temp%d_Status", index + 1);
+  snprintf(ageKey, sizeof(ageKey), "Temp%d_AgeSec", index + 1);
+  snprintf(packetsKey, sizeof(packetsKey), "Temp%d_Packets", index + 1);
+  snprintf(faultKey, sizeof(faultKey), "Temp%d_Fault", index + 1);
 
   if (isFresh(index)) {
     doc[key] = nodes[index].temperature;
@@ -195,6 +244,13 @@ void addTemperature(JsonDocument &doc, int index) {
     doc[key] = nullptr;
   }
   doc[statusKey] = nodeStatus(index);
+  if (nodes[index].lastSeenMs == 0) {
+    doc[ageKey] = nullptr;
+  } else {
+    doc[ageKey] = nodeAgeSeconds(index);
+  }
+  doc[packetsKey] = nodes[index].packets;
+  doc[faultKey] = faultName(nodes[index].faultCode);
 }
 
 void printStatus() {

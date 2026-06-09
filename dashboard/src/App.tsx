@@ -239,6 +239,11 @@ function SensorTile({ sensor }: { sensor: SensorReading }) {
       </div>
       <div className="sensor-value">{sensor.value === null ? "--" : sensor.value.toFixed(1)}</div>
       <div className="sensor-unit">deg C</div>
+      <div className="sensor-diagnostics">
+        <span>{sensor.ageSec === null ? "never seen" : `${Math.round(sensor.ageSec)}s ago`}</span>
+        <span>{sensor.packets} packets</span>
+        {sensor.fault !== "NONE" && <span>{sensor.fault}</span>}
+      </div>
     </article>
   );
 }

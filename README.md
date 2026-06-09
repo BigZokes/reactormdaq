@@ -16,6 +16,8 @@ Important folders:
 
 Current priority is temperature-only data acquisition. The gateway accepts partial thermocouple availability, so missing/stale nodes do not block rows from being written.
 
+The current data schema is `temperature-daq-v2`, which includes temperature, status, last packet age, packet count, and thermocouple fault fields for each channel.
+
 ## Quick Verification
 
 Dashboard:

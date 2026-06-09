@@ -8,6 +8,7 @@ This is the from-home web app for the reactor thermocouple DAQ system. It can ru
 - Gateway status
 - `Temp1` through `Temp8`
 - Status badges: `OK`, `MISSING`, `STALE`, `FAULT`, `UNKNOWN`
+- Per-channel diagnostics: last packet age, packet count, and thermocouple fault
 - Last update time
 - Temperature history chart
 - Recent samples table
@@ -104,7 +105,8 @@ This checks:
 - `GET ?mode=dashboard`
 - `POST method=append`
 - that the appended row is readable by the dashboard endpoint
-- that the deployed script reports the current `temperature-daq-v1` schema
+- that the deployed script reports the current `temperature-daq-v2` schema
+- that per-channel diagnostics round-trip through the sheet
 
 If this fails with a non-JSON response, the deployed Apps Script is probably still the older version and needs to be redeployed.
 

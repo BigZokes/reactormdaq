@@ -25,6 +25,7 @@ uint8_t gatewayAddress[] = {0xE4, 0xB0, 0x63, 0xAE, 0xB7, 0x2C};
 struct TemperatureMessage {
   int NodeID;
   float Temperature;
+  uint8_t FaultCode;
 };
 
 Adafruit_MAX31855 thermocouple(MAXCLK, MAXCS, MAXDO);
@@ -87,36 +88,57 @@ bool setupEspNow() {
   return true;
 }
 
-float readTemperatureC() {
+uint8_t readFaultCode() {
+  uint8_t error = thermocouple.readError();
+  uint8_t faultCode = 0;
+  if (error & MAX31855_FAULT_OPEN) {
+    faultCode |= 0x01;
+  }
+  if (error & MAX31855_FAULT_SHORT_GND) {
+    faultCode |= 0x02;
+  }
+  if (error & MAX31855_FAULT_SHORT_VCC) {
+    faultCode |= 0x04;
+  }
+  return faultCode;
+}
+
+float readTemperatureC(uint8_t &faultCode) {
   double c = thermocouple.readCelsius();
   if (isnan(c)) {
-    uint8_t error = thermocouple.readError();
+    faultCode = readFaultCode();
     Serial.print("Thermocouple fault:");
-    if (error & MAX31855_FAULT_OPEN) {
+    if (faultCode & 0x01) {
       Serial.print(" OPEN");
     }
-    if (error & MAX31855_FAULT_SHORT_GND) {
+    if (faultCode & 0x02) {
       Serial.print(" SHORT_GND");
     }
-    if (error & MAX31855_FAULT_SHORT_VCC) {
+    if (faultCode & 0x04) {
       Serial.print(" SHORT_VCC");
+    }
+    if (faultCode == 0) {
+      Serial.print(" UNKNOWN");
     }
     Serial.println();
     return NAN;
   }
+  faultCode = 0;
   return static_cast<float>(c);
 }
 
 void sendTemperature() {
   TemperatureMessage message;
   message.NodeID = NODE_ID;
-  message.Temperature = readTemperatureC();
+  message.Temperature = readTemperatureC(message.FaultCode);
 
   Serial.print("Temp");
   Serial.print(NODE_ID);
   Serial.print(" reading=");
   if (isnan(message.Temperature)) {
     Serial.print("FAULT/NAN");
+    Serial.print(" code=");
+    Serial.print(message.FaultCode);
   } else {
     Serial.print(message.Temperature, 2);
     Serial.print(" C");

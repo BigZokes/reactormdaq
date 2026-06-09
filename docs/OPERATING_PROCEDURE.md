@@ -26,6 +26,7 @@ This procedure is for temperature-only reactor experiments using the gateway plu
 - Treat `MISSING` as no packet received since gateway boot.
 - Treat `STALE` as the node reported earlier but stopped reporting for the configured timeout.
 - Treat `FAULT` as the node reported a thermocouple/MAX31855 fault or invalid temperature.
+- Use the tile diagnostics to compare last packet age and packet count. A rising age with a fixed packet count means communication stopped.
 - If one channel fails, continue logging the other channels; the gateway is designed to write partial rows.
 
 ## If A Channel Is Bad
@@ -39,7 +40,11 @@ This procedure is for temperature-only reactor experiments using the gateway plu
    - `Thermocouple fault: SHORT_VCC`
    - `ESP-NOW send ... failed`
 5. Confirm the gateway serial monitor logs `RX ... TempN`.
-6. If the wrong `TempN` appears, reflash the node using the correct PlatformIO environment.
+6. Check the dashboard or `Data` sheet diagnostic columns:
+   - `TempN_AgeSec`
+   - `TempN_Packets`
+   - `TempN_Fault`
+7. If the wrong `TempN` appears, reflash the node using the correct PlatformIO environment.
 
 ## Flashing A Node
 

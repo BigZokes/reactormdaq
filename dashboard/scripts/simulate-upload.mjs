@@ -39,19 +39,34 @@ function makePayload(sample) {
     const failure = sample % 10;
     const tempKey = `Temp${channel}`;
     const statusKey = `Temp${channel}_Status`;
+    const ageKey = `Temp${channel}_AgeSec`;
+    const packetKey = `Temp${channel}_Packets`;
+    const faultKey = `Temp${channel}_Fault`;
 
     if (channel === 3 && failure === 3) {
       payload[tempKey] = null;
       payload[statusKey] = "STALE";
+      payload[ageKey] = 35 + sample;
+      payload[packetKey] = 50 + sample;
+      payload[faultKey] = "NONE";
     } else if (channel === 5 && failure === 5) {
       payload[tempKey] = null;
       payload[statusKey] = "FAULT";
+      payload[ageKey] = 0;
+      payload[packetKey] = 60 + sample;
+      payload[faultKey] = "OPEN";
     } else if (channel === 8 && failure === 7) {
       payload[tempKey] = null;
       payload[statusKey] = "MISSING";
+      payload[ageKey] = null;
+      payload[packetKey] = 0;
+      payload[faultKey] = "NONE";
     } else {
       payload[tempKey] = round1(300 + channel * 24 + Math.sin(sample / 2 + channel) * 12);
       payload[statusKey] = "OK";
+      payload[ageKey] = 0;
+      payload[packetKey] = 100 + sample * 8 + channel;
+      payload[faultKey] = "NONE";
     }
   }
 

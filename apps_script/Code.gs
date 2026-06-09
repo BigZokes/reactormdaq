@@ -2,7 +2,7 @@ const DATA_SHEET_NAME = "Data";
 const CONTROL_SHEET_NAME = "Control";
 const RUNS_SHEET_NAME = "Runs";
 const DEFAULT_RUN_ID = "TEST-001";
-const SCHEMA_VERSION = "temperature-daq-v1";
+const SCHEMA_VERSION = "temperature-daq-v2";
 
 const HEADERS = [
   "Time",
@@ -23,6 +23,30 @@ const HEADERS = [
   "Temp6_Status",
   "Temp7_Status",
   "Temp8_Status",
+  "Temp1_AgeSec",
+  "Temp2_AgeSec",
+  "Temp3_AgeSec",
+  "Temp4_AgeSec",
+  "Temp5_AgeSec",
+  "Temp6_AgeSec",
+  "Temp7_AgeSec",
+  "Temp8_AgeSec",
+  "Temp1_Packets",
+  "Temp2_Packets",
+  "Temp3_Packets",
+  "Temp4_Packets",
+  "Temp5_Packets",
+  "Temp6_Packets",
+  "Temp7_Packets",
+  "Temp8_Packets",
+  "Temp1_Fault",
+  "Temp2_Fault",
+  "Temp3_Fault",
+  "Temp4_Fault",
+  "Temp5_Fault",
+  "Temp6_Fault",
+  "Temp7_Fault",
+  "Temp8_Fault",
   "GatewayStatus"
 ];
 
@@ -95,6 +119,30 @@ function doPost(e) {
     normalizeStatus_(data.Temp6_Status),
     normalizeStatus_(data.Temp7_Status),
     normalizeStatus_(data.Temp8_Status),
+    normalizeNumber_(data.Temp1_AgeSec),
+    normalizeNumber_(data.Temp2_AgeSec),
+    normalizeNumber_(data.Temp3_AgeSec),
+    normalizeNumber_(data.Temp4_AgeSec),
+    normalizeNumber_(data.Temp5_AgeSec),
+    normalizeNumber_(data.Temp6_AgeSec),
+    normalizeNumber_(data.Temp7_AgeSec),
+    normalizeNumber_(data.Temp8_AgeSec),
+    normalizeNumber_(data.Temp1_Packets),
+    normalizeNumber_(data.Temp2_Packets),
+    normalizeNumber_(data.Temp3_Packets),
+    normalizeNumber_(data.Temp4_Packets),
+    normalizeNumber_(data.Temp5_Packets),
+    normalizeNumber_(data.Temp6_Packets),
+    normalizeNumber_(data.Temp7_Packets),
+    normalizeNumber_(data.Temp8_Packets),
+    normalizeFault_(data.Temp1_Fault),
+    normalizeFault_(data.Temp2_Fault),
+    normalizeFault_(data.Temp3_Fault),
+    normalizeFault_(data.Temp4_Fault),
+    normalizeFault_(data.Temp5_Fault),
+    normalizeFault_(data.Temp6_Fault),
+    normalizeFault_(data.Temp7_Fault),
+    normalizeFault_(data.Temp8_Fault),
     String(data.GatewayStatus || "UNKNOWN")
   ];
 
@@ -229,6 +277,10 @@ function parsePostData_(e) {
 }
 
 function normalizeTemperature_(value) {
+  return normalizeNumber_(value);
+}
+
+function normalizeNumber_(value) {
   if (value === null || value === undefined || value === "") {
     return "";
   }
@@ -239,6 +291,11 @@ function normalizeTemperature_(value) {
 function normalizeStatus_(value) {
   const status = String(value || "MISSING").trim().toUpperCase();
   return ["OK", "MISSING", "STALE", "FAULT", "UNKNOWN"].indexOf(status) >= 0 ? status : "UNKNOWN";
+}
+
+function normalizeFault_(value) {
+  const fault = String(value || "NONE").trim().toUpperCase();
+  return ["NONE", "OPEN", "SHORT_GND", "SHORT_VCC", "UNKNOWN"].indexOf(fault) >= 0 ? fault : "UNKNOWN";
 }
 
 function sanitizeRunId_(value) {

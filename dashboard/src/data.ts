@@ -1,8 +1,11 @@
 import { APPS_SCRIPT_URL, HISTORY_LIMIT, SENSOR_COUNT } from "./config";
-import type { DashboardSnapshot, DataRow, NodeStatus, SensorReading, StatusKey, TemperatureKey } from "./types";
+import type { AgeKey, DashboardSnapshot, DataRow, FaultKey, NodeStatus, PacketKey, SensorReading, StatusKey, TemperatureKey } from "./types";
 
 const tempKey = (index: number) => `Temp${index}` as TemperatureKey;
 const statusKey = (index: number) => `Temp${index}_Status` as StatusKey;
+const ageKey = (index: number) => `Temp${index}_AgeSec` as AgeKey;
+const packetKey = (index: number) => `Temp${index}_Packets` as PacketKey;
+const faultKey = (index: number) => `Temp${index}_Fault` as FaultKey;
 const knownStatuses: NodeStatus[] = ["OK", "MISSING", "STALE", "FAULT", "UNKNOWN"];
 
 const baseProfiles = [520, 505, 480, 430, 390, 24.5, 310, 285];
@@ -13,11 +16,17 @@ export function rowToSensors(row: DataRow): SensorReading[] {
     const channel = offset + 1;
     const key = tempKey(channel);
     const status = statusKey(channel);
+    const age = ageKey(channel);
+    const packets = packetKey(channel);
+    const fault = faultKey(channel);
     return {
       channel,
       label: key,
       value: typeof row[key] === "number" ? row[key] ?? null : null,
-      status: normalizeStatus(row[status])
+      status: normalizeStatus(row[status]),
+      ageSec: typeof row[age] === "number" ? row[age] ?? null : null,
+      packets: typeof row[packets] === "number" ? row[packets] || 0 : 0,
+      fault: String(row[fault] || "NONE")
     };
   });
 }
@@ -90,7 +99,7 @@ export function makeSimulatedSnapshot(seed = Date.now(), runId = "SIM-HOME-TEST"
   const rows = Array.from({ length: HISTORY_LIMIT }, (_, index) => {
     const age = HISTORY_LIMIT - index - 1;
     const timestamp = new Date(now.getTime() - age * 5000);
-    return makeSimulatedRow(timestamp, seed - age * 5000, runId);
+    return makeSimulatedRow(timestamp, seed - age * 5000, runId, index + 1);
   });
   const latest = rows.at(-1) || emptyRow(runId);
 
@@ -104,7 +113,7 @@ export function makeSimulatedSnapshot(seed = Date.now(), runId = "SIM-HOME-TEST"
   };
 }
 
-function makeSimulatedRow(timestamp: Date, seed: number, runId: string): DataRow {
+function makeSimulatedRow(timestamp: Date, seed: number, runId: string, sampleNumber: number): DataRow {
   const row: DataRow = {
     Time: timestamp.toISOString(),
     RunID: runId,
@@ -114,22 +123,39 @@ function makeSimulatedRow(timestamp: Date, seed: number, runId: string): DataRow
   for (let channel = 1; channel <= SENSOR_COUNT; channel++) {
     const temp = tempKey(channel);
     const status = statusKey(channel);
+    const age = ageKey(channel);
+    const packets = packetKey(channel);
+    const fault = faultKey(channel);
     const wave = Math.sin(seed / (18000 + channel * 1200) + channel);
     const noise = pseudoNoise(seed, channel) * 3.2;
     const faultWindow = Math.floor(seed / 30000) % 19;
+    const simulatedAge = Math.max(0, Math.floor((Date.now() - timestamp.getTime()) / 1000));
+    const samplePackets = sampleNumber * 2 + channel;
 
     if (channel === 3 && faultWindow === 7) {
       row[temp] = null;
       row[status] = "STALE";
+      row[age] = 35 + simulatedAge;
+      row[packets] = Math.max(1, samplePackets - 12);
+      row[fault] = "NONE";
     } else if (channel === 5 && faultWindow === 11) {
       row[temp] = null;
       row[status] = "FAULT";
+      row[age] = simulatedAge;
+      row[packets] = samplePackets;
+      row[fault] = "OPEN";
     } else if (channel === 8 && faultWindow === 3) {
       row[temp] = null;
       row[status] = "MISSING";
+      row[age] = null;
+      row[packets] = 0;
+      row[fault] = "NONE";
     } else {
       row[temp] = round1(baseProfiles[channel - 1] + wave * amplitudes[channel - 1] + noise);
       row[status] = "OK";
+      row[age] = simulatedAge;
+      row[packets] = samplePackets;
+      row[fault] = "NONE";
     }
   }
 
@@ -149,10 +175,16 @@ function normalizeRows(input: unknown[]): DataRow[] {
       for (let channel = 1; channel <= SENSOR_COUNT; channel++) {
         const temp = tempKey(channel);
         const status = statusKey(channel);
+        const age = ageKey(channel);
+        const packets = packetKey(channel);
+        const fault = faultKey(channel);
         const value = row[temp];
         normalized[temp] = typeof value === "number" ? value : value === "" || value == null ? null : Number(value);
         if (Number.isNaN(normalized[temp])) normalized[temp] = null;
         normalized[status] = normalizeStatus(row[status]);
+        normalized[age] = normalizeNullableNumber(row[age]);
+        normalized[packets] = normalizeNullableNumber(row[packets]) ?? 0;
+        normalized[fault] = String(row[fault] || "NONE");
       }
 
       return normalized;
@@ -168,6 +200,9 @@ function emptyRow(runId: string): DataRow {
   for (let channel = 1; channel <= SENSOR_COUNT; channel++) {
     row[tempKey(channel)] = null;
     row[statusKey(channel)] = "UNKNOWN";
+    row[ageKey(channel)] = null;
+    row[packetKey(channel)] = 0;
+    row[faultKey(channel)] = "NONE";
   }
   return row;
 }
@@ -184,6 +219,14 @@ async function parseJsonResponse(response: Response): Promise<Record<string, any
 function normalizeStatus(value: unknown): NodeStatus {
   const status = String(value || "UNKNOWN").trim().toUpperCase() as NodeStatus;
   return knownStatuses.includes(status) ? status : "UNKNOWN";
+}
+
+function normalizeNullableNumber(value: unknown): number | null {
+  if (value === "" || value === null || value === undefined) {
+    return null;
+  }
+  const numberValue = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(numberValue) ? numberValue : null;
 }
 
 function pseudoNoise(seed: number, salt: number): number {

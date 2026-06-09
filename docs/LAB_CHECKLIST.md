@@ -10,6 +10,7 @@ Use this when you are back with the boards. The goal is to update and verify one
    cd /Users/peterzokoro/Downloads/PlatformIO-ReactorCore/reactor_temperature_daq
    git status --short
    node scripts/check-repo.mjs
+   node scripts/preflight.mjs
    ```
 
 2. Paste and deploy `apps_script/Code.gs` in Google Apps Script.
@@ -19,6 +20,7 @@ Use this when you are back with the boards. The goal is to update and verify one
    cd dashboard
    APPS_SCRIPT_URL="https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec" npm run test:backend
    cd ..
+   APPS_SCRIPT_URL="https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec" node scripts/preflight.mjs
    ```
 
 4. Open the Google Sheet and dashboard.

@@ -15,6 +15,7 @@ This project can keep moving even when the microcontrollers are not available.
 - Maintain `docs/DEVICE_MAP.csv` as the source of truth for board/channel assignment.
 - Decide the stale-node policy: keep last value, blank it out, or mark it separately.
 - Decide whether Google Sheets remains enough or whether Convex becomes the real backend later.
+- Run `node scripts/preflight.mjs` to check local build health, USB board visibility, Apps Script live-readiness, and Vercel CLI auth status without changing hardware or sheet data.
 
 ## Needs Hardware
 
@@ -37,5 +38,11 @@ This project can keep moving even when the microcontrollers are not available.
    APPS_SCRIPT_URL="https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec" npm run test:backend
    ```
 
-3. If the backend contract passes, configure `VITE_APPS_SCRIPT_URL` locally and on Vercel.
-4. When the boards are available, flash and verify `temp1` through `temp8` one at a time.
+3. From the repo root, run:
+
+   ```sh
+   APPS_SCRIPT_URL="https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec" node scripts/preflight.mjs
+   ```
+
+4. If the backend contract passes, configure `VITE_APPS_SCRIPT_URL` locally and on Vercel.
+5. When the boards are available, flash and verify `temp1` through `temp8` one at a time.

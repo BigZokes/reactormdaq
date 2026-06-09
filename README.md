@@ -51,6 +51,13 @@ Repository checks:
 node scripts/check-repo.mjs
 ```
 
+Read-only preflight:
+
+```sh
+node scripts/preflight.mjs
+APPS_SCRIPT_URL="https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec" node scripts/preflight.mjs
+```
+
 Apps Script backend after deployment:
 
 ```sh

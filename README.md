@@ -36,6 +36,13 @@ cp include/secrets.example.h include/secrets.h
 pio run -e gateway -e temp1 -e temp2 -e temp3 -e temp4 -e temp5 -e temp6 -e temp7 -e temp8
 ```
 
+Safe flash helper:
+
+```sh
+node scripts/flash-device.mjs --list
+node scripts/flash-device.mjs --env temp6 --dry-run
+```
+
 Repository checks:
 
 ```sh

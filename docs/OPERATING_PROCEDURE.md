@@ -62,6 +62,20 @@ Flash only the target node environment:
 pio run -e temp6 -t upload
 ```
 
+Safer helper flow:
+
+```sh
+node scripts/flash-device.mjs --list
+node scripts/flash-device.mjs --env temp6 --dry-run
+node scripts/flash-device.mjs --env temp6 --upload
+```
+
+If the board serial is not filled in yet in `docs/DEVICE_MAP.csv`, pass the port explicitly:
+
+```sh
+node scripts/flash-device.mjs --env temp1 --port /dev/cu.usbmodemXXXXXXXXXXXX2 --upload
+```
+
 Use the environment that matches the intended thermocouple channel. Do not flash a board until its physical label, MAC, and intended `TempN` are clear.
 
 ## After The Experiment

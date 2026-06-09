@@ -71,6 +71,12 @@ Possible architecture:
 - Vercel web app polls every 5 seconds.
 - Later, move from polling to a proper database/API if the system grows.
 
+Deployment note:
+
+- GitHub is authenticated and the draft PR is live.
+- The Vercel account connector can see the team, but the local Vercel CLI is not authenticated yet.
+- To deploy from this Mac, run the deploy from the `dashboard` folder after Vercel CLI login/linking.
+
 ## Commands Used Recently
 
 Build gateway:

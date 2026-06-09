@@ -93,6 +93,10 @@ Gateway firmware behavior:
   - `STALE`: node was seen before but has not sent recently
   - `FAULT`: node sent a bad/NaN thermocouple value
 - Adds `GatewayStatus`.
+- Adds per-channel diagnostics in the v2 schema:
+  - `TempN_AgeSec`: seconds since the gateway last heard from that channel
+  - `TempN_Packets`: number of packets received for that channel since gateway boot
+  - `TempN_Fault`: MAX31855 fault name such as `NONE`, `OPEN`, `SHORT_GND`, or `SHORT_VCC`
 - Treats Google `2xx` and `3xx` response codes as accepted. Google Apps Script often returns `302`, which is OK.
 
 Example verified gateway upload payload:
@@ -113,6 +117,9 @@ Example verified gateway upload payload:
   "Temp5_Status": "MISSING",
   "Temp6": 24.25,
   "Temp6_Status": "OK",
+  "Temp6_AgeSec": 0,
+  "Temp6_Packets": 42,
+  "Temp6_Fault": "NONE",
   "Temp7": null,
   "Temp7_Status": "MISSING",
   "Temp8": null,
@@ -169,6 +176,30 @@ Temp5_Status
 Temp6_Status
 Temp7_Status
 Temp8_Status
+Temp1_AgeSec
+Temp2_AgeSec
+Temp3_AgeSec
+Temp4_AgeSec
+Temp5_AgeSec
+Temp6_AgeSec
+Temp7_AgeSec
+Temp8_AgeSec
+Temp1_Packets
+Temp2_Packets
+Temp3_Packets
+Temp4_Packets
+Temp5_Packets
+Temp6_Packets
+Temp7_Packets
+Temp8_Packets
+Temp1_Fault
+Temp2_Fault
+Temp3_Fault
+Temp4_Fault
+Temp5_Fault
+Temp6_Fault
+Temp7_Fault
+Temp8_Fault
 GatewayStatus
 ```
 

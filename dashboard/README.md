@@ -6,6 +6,7 @@ This is the from-home web app for the reactor thermocouple DAQ system. It can ru
 
 - Current `RunID`
 - Gateway status
+- Backend/schema status
 - `Temp1` through `Temp8`
 - Status badges: `OK`, `MISSING`, `STALE`, `FAULT`, `UNKNOWN`
 - Per-channel diagnostics: last packet age, packet count, and thermocouple fault
@@ -59,6 +60,14 @@ The dashboard live mode expects the Apps Script web app to support:
 GET ?mode=dashboard&limit=80
 POST {"method":"setRun","RunID":"EXP-2026-06-09-A"}
 ```
+
+The live dashboard also expects the endpoint to report:
+
+```text
+schemaVersion = temperature-daq-v2
+```
+
+If the deployed Apps Script is older or missing that schema version, live mode falls back to simulator mode and shows a redeploy warning.
 
 The local Apps Script source with this support is:
 

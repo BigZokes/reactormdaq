@@ -7,5 +7,6 @@
 dashboard/node_modules/
 dashboard/dist/
 dashboard/.env
+dashboard/.vercel/
 dashboard/tsconfig.tsbuildinfo
 include/secrets.h

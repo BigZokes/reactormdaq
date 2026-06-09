@@ -1,7 +1,7 @@
 import { AlertTriangle, Activity, CheckCircle2, Database, Play, Radio, RefreshCw, Thermometer, Wifi } from "lucide-react";
 import type { FormEvent, ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
-import { APPS_SCRIPT_URL, POLL_INTERVAL_MS } from "./config";
+import { APPS_SCRIPT_URL, EXPECTED_SCHEMA_VERSION, POLL_INTERVAL_MS } from "./config";
 import { fetchLiveSnapshot, makeSimulatedSnapshot, setLiveRunId } from "./data";
 import type { DashboardSnapshot, NodeStatus, SensorReading } from "./types";
 import "./styles.css";
@@ -101,6 +101,12 @@ export default function App() {
         <Metric icon={<Database size={18} />} label="Run ID" value={snapshot.runId} />
         <Metric icon={<Wifi size={18} />} label="Gateway" value={snapshot.gatewayStatus} tone={snapshot.gatewayStatus === "OK" ? "good" : "bad"} />
         <Metric icon={<Thermometer size={18} />} label="Sensors OK" value={`${health.ok}/8`} tone={health.bad ? "warn" : "good"} />
+        <Metric
+          icon={<CheckCircle2 size={18} />}
+          label="Backend"
+          value={snapshot.source === "live" ? snapshot.schemaVersion : "simulator"}
+          tone={snapshot.source === "live" && snapshot.schemaVersion === EXPECTED_SCHEMA_VERSION ? "good" : undefined}
+        />
         <Metric icon={<Activity size={18} />} label="Last Update" value={formatTime(snapshot.lastUpdate)} />
       </section>
 

@@ -72,6 +72,7 @@ export type DataRow = {
 export type DashboardSnapshot = {
   source: "live" | "simulated";
   runId: string;
+  schemaVersion: string;
   lastUpdate: string;
   gatewayStatus: string;
   sensors: SensorReading[];

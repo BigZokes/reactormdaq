@@ -1,4 +1,4 @@
-import { APPS_SCRIPT_URL, HISTORY_LIMIT, SENSOR_COUNT } from "./config";
+import { APPS_SCRIPT_URL, EXPECTED_SCHEMA_VERSION, HISTORY_LIMIT, SENSOR_COUNT } from "./config";
 import type { AgeKey, DashboardSnapshot, DataRow, FaultKey, NodeStatus, PacketKey, SensorReading, StatusKey, TemperatureKey } from "./types";
 
 const tempKey = (index: number) => `Temp${index}` as TemperatureKey;
@@ -46,12 +46,19 @@ export async function fetchLiveSnapshot(): Promise<DashboardSnapshot> {
   }
 
   const payload = await parseJsonResponse(response);
+  if (payload.schemaVersion !== EXPECTED_SCHEMA_VERSION) {
+    throw new Error(
+      `Apps Script schema is ${String(payload.schemaVersion || "missing")}; redeploy apps_script/Code.gs for ${EXPECTED_SCHEMA_VERSION}`
+    );
+  }
+
   const rows = normalizeRows(payload.rows || []);
   const latest = rows.at(-1) || emptyRow(payload.runId || "UNKNOWN");
 
   return {
     source: "live",
     runId: payload.runId || latest.RunID || "UNKNOWN",
+    schemaVersion: payload.schemaVersion,
     lastUpdate: latest.Time,
     gatewayStatus: latest.GatewayStatus || "UNKNOWN",
     sensors: rowToSensors(latest),
@@ -106,6 +113,7 @@ export function makeSimulatedSnapshot(seed = Date.now(), runId = "SIM-HOME-TEST"
   return {
     source: "simulated",
     runId: latest.RunID,
+    schemaVersion: "simulator",
     lastUpdate: latest.Time,
     gatewayStatus: latest.GatewayStatus,
     sensors: rowToSensors(latest),

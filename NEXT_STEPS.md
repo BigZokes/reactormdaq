@@ -22,6 +22,7 @@ Saved: 2026-06-08 22:11 CDT
   - `Control` sheet with `CurrentRunID` in `B1`
   - `Data` sheet as the main append-only experiment table
   - `RunID` on every row so separate experiments do not overwrite each other
+- Important: the local repo source supports the dashboard read API, but the Google Apps Script editor was verified on 2026-06-09 to still contain an older script missing `doGet`. Paste/deploy `apps_script/Code.gs` before expecting live dashboard mode to work.
 
 ## Tomorrow Priority
 
@@ -75,6 +76,7 @@ Deployment note:
 
 - GitHub is authenticated and the draft PR is live.
 - The Vercel account connector can see the team, but the local Vercel CLI is not authenticated yet.
+- The live Apps Script endpoint must pass `node scripts/preflight.mjs` or `npm run test:backend` before the Vercel dashboard can show real sheet data.
 - To deploy from this Mac, run the deploy from the `dashboard` folder after Vercel CLI login/linking.
 - Detailed deployment steps and the manual GitHub Actions deploy workflow are in `docs/DASHBOARD_DEPLOYMENT.md`.
 

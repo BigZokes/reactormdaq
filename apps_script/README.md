@@ -30,6 +30,18 @@ Apps Script backend contract passed.
 
 If it returns HTML or says the response is not JSON, the deployed web app is still running old Apps Script code.
 
+## Current Blocker
+
+Verified on 2026-06-09: the Apps Script project editor opens, but the visible `Code.gs` is still the older script. It has `doPost` and the first v2 run columns, but it does not include `doGet`, `SCHEMA_VERSION = "temperature-daq-v2"`, or the per-channel diagnostic headers.
+
+That matches the live endpoint behavior: `GET ?mode=health` returns an HTML Apps Script error saying `Script function not found: doGet`.
+
+Next action: replace the editor contents with the repo copy at `apps_script/Code.gs`, save, then update or create the web app deployment. After that, rerun:
+
+```sh
+APPS_SCRIPT_URL="https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec" node scripts/preflight.mjs
+```
+
 ## Sheet Layout
 
 The script manages two sheets:

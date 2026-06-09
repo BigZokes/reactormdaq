@@ -11,6 +11,7 @@ const secretScanTargets = [
   "include",
   "src",
   "src_legacy",
+  "scripts",
   "platformio.ini",
   "MEMORY.md",
   "NEXT_STEPS.md",
@@ -24,6 +25,10 @@ for (const target of secretScanTargets) {
 execFileSync("node", ["--check", "--input-type=commonjs"], {
   input: readFileSync("apps_script/Code.gs"),
   stdio: ["pipe", "inherit", "inherit"]
+});
+
+execFileSync("node", ["scripts/test-apps-script-migration.mjs"], {
+  stdio: "inherit"
 });
 
 const deviceMap = readFileSync("docs/DEVICE_MAP.csv", "utf8").trimEnd().split(/\r?\n/);

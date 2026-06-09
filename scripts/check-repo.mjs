@@ -31,6 +31,10 @@ execFileSync("node", ["scripts/test-apps-script-migration.mjs"], {
   stdio: "inherit"
 });
 
+execFileSync("node", ["--check", "scripts/flash-device.mjs"], {
+  stdio: "inherit"
+});
+
 const deviceMap = readFileSync("docs/DEVICE_MAP.csv", "utf8").trimEnd().split(/\r?\n/);
 const expectedColumns = splitCsvLine(deviceMap[0]).length;
 deviceMap.forEach((line, index) => {

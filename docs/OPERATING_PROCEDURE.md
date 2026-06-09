@@ -81,6 +81,15 @@ Use the environment that matches the intended thermocouple channel. Do not flash
 
 When a new board serial is confirmed, add it to `docs/DEVICE_MAP.csv` before flashing. That lets the helper auto-resolve the correct USB port next time.
 
+To update the map safely:
+
+```sh
+node scripts/flash-device.mjs --env temp1 --set-serial 206EF133B55C
+node scripts/flash-device.mjs --env temp1 --set-serial 206EF133B55C --write
+```
+
+The first command is a dry run. The second command updates `docs/DEVICE_MAP.csv`.
+
 ## After The Experiment
 
 1. Confirm the final rows use the intended `RunID`.

@@ -42,6 +42,7 @@ Safe flash helper:
 node scripts/flash-device.mjs --list
 node scripts/flash-device.mjs --ports
 node scripts/flash-device.mjs --env temp6 --dry-run
+node scripts/flash-device.mjs --env temp1 --set-serial 206EF133B55C
 ```
 
 Repository checks:

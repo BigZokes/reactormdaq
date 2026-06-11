@@ -98,6 +98,7 @@ h2 {
 
 .status-strip,
 .sensor-grid,
+.device-map-section,
 .chart-section,
 .table-section,
 .alarm-band,
@@ -355,12 +356,88 @@ h2 {
 }
 
 .chart-section,
+.device-map-section,
 .table-section {
   background: #ffffff;
   border: 1px solid #dfe4e8;
   border-radius: 8px;
   margin-bottom: 16px;
   padding: 16px;
+}
+
+.device-map-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.device-map-card {
+  border: 1px solid #dfe4e8;
+  border-left: 5px solid #9aa5af;
+  border-radius: 8px;
+  min-height: 174px;
+  padding: 12px;
+}
+
+.device-map-card.working {
+  border-left-color: #238653;
+}
+
+.device-map-card.needs-work {
+  border-left-color: #d3951f;
+}
+
+.device-map-topline {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.device-map-topline strong {
+  color: #242a31;
+  font-size: 0.95rem;
+}
+
+.device-map-topline span {
+  background: #edf1f4;
+  border-radius: 999px;
+  color: #34404c;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 4px 7px;
+}
+
+.device-map-status {
+  color: #59636d;
+  font-size: 0.8rem;
+  font-weight: 800;
+  margin-top: 7px;
+}
+
+.device-map-card dl {
+  display: grid;
+  gap: 7px;
+  margin: 12px 0 0;
+}
+
+.device-map-card dl > div {
+  min-width: 0;
+}
+
+.device-map-card dt {
+  color: #7a858f;
+  font-size: 0.68rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.device-map-card dd {
+  color: #2d363f;
+  font-size: 0.78rem;
+  font-weight: 750;
+  margin: 2px 0 0;
+  overflow-wrap: anywhere;
 }
 
 .section-heading {
@@ -482,7 +559,8 @@ svg {
   }
 
   .status-strip,
-  .sensor-grid {
+  .sensor-grid,
+  .device-map-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -497,7 +575,8 @@ svg {
 
 @media (max-width: 560px) {
   .status-strip,
-  .sensor-grid {
+  .sensor-grid,
+  .device-map-grid {
     grid-template-columns: 1fr;
   }
 

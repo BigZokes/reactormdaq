@@ -273,19 +273,47 @@ void printStatus() {
   Serial.println();
 }
 
-void uploadToGoogleSheet() {
-  if (!everReceivedData) {
-    Serial.println("No node data received yet; skipping upload.");
-    return;
+bool postJsonToEndpoint(const char *label, const char *url, const String &jsonData) {
+  WiFiClientSecure client;
+  client.setInsecure();
+
+  HTTPClient http;
+  http.setFollowRedirects(HTTPC_DISABLE_FOLLOW_REDIRECTS);
+  if (!http.begin(client, url)) {
+    Serial.print(label);
+    Serial.println(" HTTP begin failed.");
+    return false;
+  }
+  http.addHeader("Content-Type", "application/json");
+
+  int code = http.POST(jsonData);
+  String response = http.getString();
+  http.end();
+
+  if (code >= 200 && code < 400) {
+    Serial.print(label);
+    Serial.print(" upload accepted. code=");
+    Serial.println(code);
+    return true;
   }
 
+  Serial.print(label);
+  Serial.print(" response code=");
+  Serial.print(code);
+  Serial.print(" body=");
+  Serial.println(response);
+  return false;
+}
+
+void uploadToConvex() {
   if (!connectWifi(10000)) {
     Serial.println("Upload skipped because WiFi is disconnected.");
     return;
   }
 
   JsonDocument doc;
-  doc["method"] = "append";
+  doc["runId"] = "GATEWAY-LIVE";
+  doc["gatewayMac"] = WiFi.macAddress();
   doc["GatewayStatus"] = WiFi.status() == WL_CONNECTED ? "OK" : "WIFI_DOWN";
   for (int i = 0; i < kNodeCount; i++) {
     addTemperature(doc, i);
@@ -294,34 +322,11 @@ void uploadToGoogleSheet() {
   String jsonData;
   serializeJson(doc, jsonData);
 
-  Serial.print("Uploading: ");
+  Serial.print("Uploading to Convex: ");
   Serial.println(jsonData);
 
-  WiFiClientSecure client;
-  client.setInsecure();
-
-  HTTPClient http;
-  http.setFollowRedirects(HTTPC_DISABLE_FOLLOW_REDIRECTS);
-  if (!http.begin(client, GOOGLE_SCRIPT_URL)) {
-    Serial.println("HTTP begin failed.");
-    return;
-  }
-  http.addHeader("Content-Type", "application/json");
-
-  int code = http.POST(jsonData);
-  String response = http.getString();
-
-  if (code >= 200 && code < 400) {
-    Serial.print("Sheet upload accepted. code=");
-    Serial.println(code);
-  } else {
-    Serial.print("Sheet response code=");
-    Serial.print(code);
-    Serial.print(" body=");
-    Serial.println(response);
-  }
-
-  http.end();
+  postJsonToEndpoint("Convex lab", CONVEX_INGEST_URL, jsonData);
+  postJsonToEndpoint("Convex legacy", CONVEX_LEGACY_INGEST_URL, jsonData);
 }
 
 void setup() {
@@ -349,6 +354,6 @@ void loop() {
   if (millis() - lastUploadMs >= kUploadIntervalMs) {
     lastUploadMs = millis();
     printStatus();
-    uploadToGoogleSheet();
+    uploadToConvex();
   }
 }

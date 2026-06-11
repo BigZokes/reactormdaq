@@ -45,6 +45,12 @@ node scripts/flash-device.mjs --env temp6 --dry-run
 node scripts/flash-device.mjs --env temp1 --set-serial 206EF133B55C
 ```
 
+After editing `docs/DEVICE_MAP.csv`, refresh the dashboard copy:
+
+```sh
+node scripts/generate-dashboard-device-map.mjs
+```
+
 Repository checks:
 
 ```sh

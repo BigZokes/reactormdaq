@@ -27,8 +27,9 @@ Saved: 2026-06-08 22:11 CDT
 ## Tomorrow Priority
 
 1. Update and test the remaining thermocouple nodes.
+   - Use `docs/THERMOCOUPLE_UPDATE_WORKFLOW.md` as the hardware-only execution log.
    - Confirm each node's MAC address.
-   - Flash each node with the shared `tc_node.cpp` firmware using its correct `TEMP_INDEX`.
+   - Flash each node with the shared `tc_node.cpp` firmware using its correct `NODE_ID`.
    - Confirm the gateway receives each node as the correct `TempN`.
    - Verify Google Sheets rows show `OK` for active nodes and `MISSING` or `STALE` for inactive nodes.
 

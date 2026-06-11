@@ -2,6 +2,7 @@
 #include <SPI.h>
 #include <WiFi.h>
 #include <esp_now.h>
+#include <esp_wifi.h>
 
 #include "Adafruit_MAX31855.h"
 #include "secrets.h"
@@ -30,6 +31,7 @@ struct TemperatureMessage {
 
 Adafruit_MAX31855 thermocouple(MAXCLK, MAXCS, MAXDO);
 unsigned long lastSendMs = 0;
+int espNowChannel = 0;
 
 String macToString(const uint8_t *mac) {
   char buffer[18];
@@ -45,8 +47,76 @@ void onDataSent(const uint8_t *macAddress, esp_now_send_status_t status) {
   Serial.println(status == ESP_NOW_SEND_SUCCESS ? "success" : "failed");
 }
 
+int scanConfiguredWifiChannel() {
+  Serial.print("Scanning for WiFi SSID ");
+  Serial.println(WIFI_SSID);
+
+  int networkCount = WiFi.scanNetworks(false, true);
+  if (networkCount < 0) {
+    Serial.print("WiFi scan failed: ");
+    Serial.println(networkCount);
+    return 0;
+  }
+
+  int bestChannel = 0;
+  int bestRssi = -1000;
+  for (int i = 0; i < networkCount; i++) {
+    if (WiFi.SSID(i) == WIFI_SSID && WiFi.RSSI(i) > bestRssi) {
+      bestRssi = WiFi.RSSI(i);
+      bestChannel = WiFi.channel(i);
+    }
+  }
+
+  if (bestChannel > 0) {
+    Serial.print("Found configured SSID. RSSI=");
+    Serial.print(bestRssi);
+    Serial.print(" dBm channel=");
+    Serial.println(bestChannel);
+  } else {
+    Serial.print("Configured SSID not found. Networks seen=");
+    Serial.println(networkCount);
+  }
+
+  return bestChannel;
+}
+
+bool setEspNowChannel(int channel) {
+  if (channel <= 0) {
+    return false;
+  }
+
+  WiFi.disconnect(false);
+  WiFi.scanDelete();
+  delay(100);
+
+  esp_wifi_set_ps(WIFI_PS_NONE);
+  esp_err_t result = esp_wifi_set_promiscuous(true);
+  if (result != ESP_OK) {
+    Serial.print("ESP-NOW promiscuous enable failed. error=");
+    Serial.println(result);
+  }
+
+  result = esp_wifi_set_channel(channel, WIFI_SECOND_CHAN_NONE);
+  esp_wifi_set_promiscuous(false);
+
+  if (result == ESP_OK) {
+    espNowChannel = channel;
+    Serial.print("ESP-NOW channel set to ");
+    Serial.println(channel);
+    return true;
+  } else {
+    Serial.print("ESP-NOW channel set failed. error=");
+    Serial.println(result);
+    return false;
+  }
+}
+
 void connectWifiForChannel() {
   WiFi.mode(WIFI_STA);
+  WiFi.disconnect();
+  delay(100);
+
+  int scannedChannel = scanConfiguredWifiChannel();
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
   Serial.print("Connecting WiFi for channel sync");
@@ -60,8 +130,19 @@ void connectWifiForChannel() {
   if (WiFi.status() == WL_CONNECTED) {
     Serial.print("WiFi connected. channel=");
     Serial.println(WiFi.channel());
+    setEspNowChannel(WiFi.channel());
   } else {
-    Serial.println("WiFi not connected. ESP-NOW will try default channel.");
+    Serial.println("WiFi not connected.");
+    if (scannedChannel > 0) {
+      Serial.println("Using scanned WiFi channel for ESP-NOW.");
+      if (!setEspNowChannel(scannedChannel)) {
+        espNowChannel = scannedChannel;
+        Serial.print("Peer will still use scanned channel ");
+        Serial.println(espNowChannel);
+      }
+    } else {
+      Serial.println("ESP-NOW will try default channel.");
+    }
   }
 }
 
@@ -75,7 +156,7 @@ bool setupEspNow() {
 
   esp_now_peer_info_t peerInfo = {};
   memcpy(peerInfo.peer_addr, gatewayAddress, 6);
-  peerInfo.channel = 0;
+  peerInfo.channel = espNowChannel > 0 ? espNowChannel : 0;
   peerInfo.encrypt = false;
 
   if (esp_now_add_peer(&peerInfo) != ESP_OK) {
@@ -85,6 +166,10 @@ bool setupEspNow() {
 
   Serial.print("Gateway peer added: ");
   Serial.println(macToString(gatewayAddress));
+  if (peerInfo.channel > 0) {
+    Serial.print("Gateway peer channel: ");
+    Serial.println(peerInfo.channel);
+  }
   return true;
 }
 

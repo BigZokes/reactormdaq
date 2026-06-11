@@ -43,6 +43,14 @@ execFileSync("node", ["--check", "scripts/preflight.mjs"], {
   stdio: "inherit"
 });
 
+execFileSync("node", ["--check", "scripts/generate-dashboard-device-map.mjs"], {
+  stdio: "inherit"
+});
+
+execFileSync("node", ["scripts/generate-dashboard-device-map.mjs", "--check"], {
+  stdio: "inherit"
+});
+
 const deviceMap = readFileSync("docs/DEVICE_MAP.csv", "utf8").trimEnd().split(/\r?\n/);
 const expectedColumns = splitCsvLine(deviceMap[0]).length;
 deviceMap.forEach((line, index) => {

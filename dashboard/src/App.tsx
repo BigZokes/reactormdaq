@@ -3,6 +3,7 @@ import type { FormEvent, ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { APPS_SCRIPT_URL, EXPECTED_SCHEMA_VERSION, POLL_INTERVAL_MS } from "./config";
 import { fetchLiveSnapshot, makeSimulatedSnapshot, setLiveRunId } from "./data";
+import { deviceMap, type DeviceMapEntry } from "./deviceMap";
 import type { DashboardSnapshot, NodeStatus, SensorReading } from "./types";
 import "./styles.css";
 
@@ -149,6 +150,8 @@ export default function App() {
         ))}
       </section>
 
+      <DeviceMapPanel entries={deviceMap} />
+
       <section className="chart-section">
         <div className="section-heading">
           <h2>Temperature History</h2>
@@ -251,6 +254,52 @@ function SensorTile({ sensor }: { sensor: SensorReading }) {
         {sensor.fault !== "NONE" && <span>{sensor.fault}</span>}
       </div>
     </article>
+  );
+}
+
+function DeviceMapPanel({ entries }: { entries: DeviceMapEntry[] }) {
+  const tempEntries = entries.filter((entry) => entry.channel.startsWith("Temp"));
+  const working = tempEntries.filter((entry) => entry.status === "Working").length;
+  const unknownSerial = tempEntries.filter((entry) => !entry.knownSerial).length;
+
+  return (
+    <section className="device-map-section">
+      <div className="section-heading">
+        <h2>Board Map</h2>
+        <span>
+          {working}/{tempEntries.length} verified · {unknownSerial} serials needed
+        </span>
+      </div>
+      <div className="device-map-grid">
+        {tempEntries.map((entry) => (
+          <article key={entry.channel} className={`device-map-card ${entry.status === "Working" ? "working" : "needs-work"}`}>
+            <div className="device-map-topline">
+              <strong>{entry.channel}</strong>
+              <span>{entry.platformioEnv}</span>
+            </div>
+            <div className="device-map-status">{entry.status}</div>
+            <dl>
+              <div>
+                <dt>MAC</dt>
+                <dd>{entry.knownMac || "unknown"}</dd>
+              </div>
+              <div>
+                <dt>Serial</dt>
+                <dd>{entry.knownSerial || "not recorded"}</dd>
+              </div>
+              <div>
+                <dt>Label</dt>
+                <dd>{entry.physicalLabel || "unlabeled"}</dd>
+              </div>
+              <div>
+                <dt>Verified</dt>
+                <dd>{entry.lastVerified || "not yet"}</dd>
+              </div>
+            </dl>
+          </article>
+        ))}
+      </div>
+    </section>
   );
 }
 
